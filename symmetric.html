@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symmetric Encryption - IPFS</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="index.html">← Home</a>
+            <span>Symmetric Encryption (AES-256)</span>
+        </nav>
+
+        <div class="card">
+            <h2>🔑 Symmetric Encryption</h2>
+            <p class="subtitle">Encrypt and decrypt using a single secret key</p>
+
+           <!-- IPFS Status -->
+            <div id="ipfsStatus" class="status-box" style="background: #fff3cd; border-left-color: #ffc107;">
+                 ⏳ Connecting to IPFS...
+            </div>
+
+            <!-- Key Input -->
+            <div class="form-group">
+                <label for="symKey">🔐 Secret Key (keep this safe!)</label>
+                <input type="password" id="symKey" value="my-secret-key-12345" class="form-control">
+                <small>Use a strong key. The same key is needed for decryption.</small>
+            </div>
+
+            <!-- Data Input -->
+            <div class="form-group">
+                <label for="symText">📝 Input Text</label>
+                <textarea id="symText" rows="4" placeholder="Enter text to encrypt..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>📎 Or upload a file</label>
+                <input type="file" id="symFileInput" class="form-control">
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="button-group">
+                <button id="symEncryptBtn" class="btn btn-primary">🔒 Encrypt & Store</button>
+                <button id="symDecryptBtn" class="btn btn-secondary">🔓 Decrypt</button>
+            </div>
+
+            <!-- CID Display with Share Buttons -->
+            <div class="form-group">
+                <label for="symCidInput">📋 Data ID</label>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" id="symCidInput" placeholder="ID will appear here after encryption" class="form-control" readonly style="background: #f5f8fa; cursor: default; flex: 1; min-width: 150px;">
+                    <button id="symDecryptCidBtn" class="btn btn-sm btn-outline" style="white-space: nowrap;">Decrypt</button>
+                </div>
+                <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button id="symExportDataBtn" class="btn btn-sm btn-outline" style="border-color: #28a745; color: #28a745;">💾 Export Encrypted Data</button>
+                    <button id="symImportDataBtn" class="btn btn-sm btn-outline" style="border-color: #ffc107; color: #856404;">📂 Import Encrypted Data</button>
+                    <button id="symCopyIdBtn" class="btn btn-sm btn-outline">📋 Copy ID</button>
+                </div>
+                <small>💡 Export data to share with others (works even without IPFS)</small>
+            </div>
+
+            <!-- Status and Output -->
+            <div id="symStatus" class="status-box">✅ Ready</div>
+            <div id="symCidDisplay" class="hash-display"></div>
+        </div>
+
+        <div class="info-box">
+            <h4>💡 How it works</h4>
+            <ol>
+                <li>Enter your secret key or use the default</li>
+                <li>Type text or upload a file</li>
+                <li>Click "Encrypt & Store" → Data is encrypted and stored locally</li>
+                <li>The ID appears automatically in the field below</li>
+                <li>To share: Click "Export Encrypted Data" and send the file</li>
+                <li>To receive: Click "Import Encrypted Data" and select the file</li>
+                <li>Click "Decrypt" to retrieve your data</li>
+            </ol>
+            <p style="margin-top: 10px; color: #6c757d; font-size: 0.9rem;">
+                📦 Data is stored locally in your browser. Export/Import to share!
+            </p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ipfs-http-client@60.0.1/dist/index.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.3.2/jsencrypt.min.js"></script>
+    <script src="js/ipfs.js"></script>
+    <script src="js/symmetric.js"></script>
+</body>
+</html>

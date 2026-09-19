@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asymmetric Encryption - IPFS</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="index.html">← Home</a>
+            <span>Asymmetric Encryption (RSA-2048)</span>
+        </nav>
+
+        <div class="card">
+            <h2>🔐 Asymmetric Encryption</h2>
+            <p class="subtitle">Public key encrypts, private key decrypts</p>
+
+            <!-- IPFS Status -->
+            <div id="ipfsStatus" class="status-box" style="background: #fff3cd; border-left-color: #ffc107;">
+                 ⏳ Connecting to IPFS...
+            </div>
+
+            <!-- === YOUR KEYS === -->
+            <div class="form-group key-management" style="border-color: #28a745;">
+                <div class="key-header">
+                    <h3>🔑 <span style="color: #28a745;">YOUR</span> RSA Key Pair</h3>
+                    <button id="genRsaKeyBtn" class="btn btn-sm btn-primary">Generate New Keys</button>
+                </div>
+                
+                <div class="key-display">
+                    <div class="key-item" style="background: #f0f8ff; padding: 6px; border-radius: 4px; margin-bottom: 4px;">
+                        <span class="key-label">🔓 Your Public Key:</span>
+                        <span id="asymPubKeyPreview" class="key-value" style="font-size: 0.7rem;">Loading...</span>
+                    </div>
+                    <div class="key-item" style="background: #fff0f0; padding: 6px; border-radius: 4px;">
+                        <span class="key-label">🔒 Your Private Key:</span>
+                        <span id="asymPrivKeyPreview" class="key-value" style="font-size: 0.7rem;">Loading...</span>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button id="copyPubKeyBtn" class="btn btn-sm btn-outline" style="border-color: #28a745; color: #28a745;">📋 Copy Your Public Key</button>
+                    <button id="exportKeysBtn" class="btn btn-sm btn-outline">💾 Export Keys (JSON)</button>
+                    <button id="importPubKeyBtn" class="btn btn-sm btn-outline" style="border-color: #ffc107; color: #856404;">📥 Import Someone's Public Key</button>
+                </div>
+                
+                <small style="color: #28a745;">✅ Your public key can be shared with anyone</small>
+                <small style="color: #dc3545; display: block;">⚠️ NEVER share your private key! Keep it secret!</small>
+                <small style="color: #dc3545; display: block; margin-top: 4px;">⚠️ RSA-2048 can only encrypt ~245 bytes (use Hybrid for larger data)</small>
+            </div>
+
+            <!-- === RECIPIENT'S PUBLIC KEY === -->
+            <div class="form-group" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; border: 2px dashed #6c757d;">
+                <label style="font-weight: 600;">👤 Recipient's Public Key (for encrypting to someone else)</label>
+                <textarea id="recipientPubKey" rows="3" placeholder="Paste someone else's public key here to encrypt for them..." style="width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 6px; font-family: monospace; font-size: 0.75rem;"></textarea>
+                <small>💡 Paste another person's public key here to encrypt data that ONLY they can decrypt</small>
+                <div style="margin-top: 6px;">
+                    <button id="clearRecipientKeyBtn" class="btn btn-sm btn-secondary">Clear</button>
+                    <span id="recipientKeyStatus" style="margin-left: 10px; font-size: 0.85rem; color: #6c757d;">No recipient key loaded</span>
+                </div>
+            </div>
+
+            <!-- Data Input -->
+            <div class="form-group">
+                <label for="asymText">📝 Input Text</label>
+                <textarea id="asymText" rows="4" placeholder="Enter text to encrypt..."></textarea>
+                <div id="charCount" style="text-align: right; font-size: 0.85rem; color: #6c757d; margin-top: 4px;">0 / 245 characters</div>
+            </div>
+
+            <div class="form-group">
+                <label>📎 Or upload a file</label>
+                <input type="file" id="asymFileInput" class="form-control">
+                <small>Files are base64 encoded. Use ⚡ Hybrid mode for large files.</small>
+            </div>
+
+            <!-- Encryption Mode Selection -->
+            <div class="form-group" style="background: #e8f4fd; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                <label style="font-weight: 600;">🎯 Encryption Mode</label>
+                <div style="display: flex; gap: 20px; margin-top: 8px; flex-wrap: wrap;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="radio" name="encryptMode" value="self" checked>
+                        🔓 Encrypt for myself
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="radio" name="encryptMode" value="recipient">
+                        🔐 Encrypt for someone else
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; background: #d4edda; padding: 4px 12px; border-radius: 20px;">
+                        <input type="radio" name="encryptMode" value="hybrid">
+                        ⚡ Hybrid (AES + RSA) 
+                    </label>
+                </div>
+                <small id="modeHelp">💡 Encrypt for yourself: you'll be able to decrypt with your private key</small>
+            </div>
+
+            <!-- ============ ACTION BUTTONS (THE MISSING PART!) ============ -->
+            <div class="button-group">
+                <button id="asymEncryptBtn" class="btn btn-primary">🔒 Encrypt & Store</button>
+                <button id="asymDecryptBtn" class="btn btn-secondary">🔓 Decrypt</button>
+            </div>
+            <!-- ========================================================= -->
+
+            <!-- === PRIVATE KEY INPUT (for decryption) === -->
+            <div class="form-group" id="privateKeyGroup" style="display: none; background: #fff8e1; padding: 1rem; border-radius: 8px; border: 2px solid #ffc107;">
+                <label for="asymPrivateKeyInput" style="font-weight: 600;">🔒 Enter Your Private Key to Decrypt</label>
+                <textarea id="asymPrivateKeyInput" rows="3" placeholder="Paste your RSA private key here..." 
+                          style="width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 6px; font-family: monospace; font-size: 0.75rem;"></textarea>
+                <div style="margin-top: 6px;">
+                    <button id="loadPrivateKeyBtn" class="btn btn-sm btn-outline" style="border-color: #28a745; color: #28a745;">📥 Load Private Key</button>
+                    <span id="privateKeyStatus" style="margin-left: 10px; font-size: 0.85rem; color: #856404;">No private key loaded</span>
+                </div>
+                <small style="color: #856404;">⚠️ Your private key never leaves your browser. It is only used locally for decryption.</small>
+            </div>
+
+            <!-- CID Display with Share Buttons -->
+            <div class="form-group">
+                <label for="asymCidInput">📋 Data ID</label>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" id="asymCidInput" placeholder="ID will appear here after encryption" class="form-control" readonly style="background: #f5f8fa; cursor: default; flex: 1; min-width: 150px;">
+                    <button id="asymDecryptCidBtn" class="btn btn-sm btn-outline" style="white-space: nowrap;">Decrypt</button>
+                </div>
+                <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button id="asymExportDataBtn" class="btn btn-sm btn-outline" style="border-color: #28a745; color: #28a745;">💾 Export Encrypted Data</button>
+                    <button id="asymImportDataBtn" class="btn btn-sm btn-outline" style="border-color: #ffc107; color: #856404;">📂 Import Encrypted Data</button>
+                    <button id="asymCopyIdBtn" class="btn btn-sm btn-outline">📋 Copy ID</button>
+                </div>
+                <small>💡 Export data to share with others (works even without IPFS)</small>
+            </div>
+
+            <!-- Status and Output -->
+            <div id="asymStatus" class="status-box">✅ Ready</div>
+            <div id="asymCidDisplay" class="hash-display"></div>
+        </div>
+
+        <div class="info-box" style="background: #f0f7ff; border-color: #2b6cb0;">
+            <h4>💡 How to Share When IPFS is Unavailable</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 12px;">
+                <div style="background: white; padding: 12px; border-radius: 8px; border-left: 4px solid #28a745;">
+                    <h5 style="margin: 0 0 8px 0; color: #28a745;">👩 Sender</h5>
+                    <ol style="margin: 0; padding-left: 20px; font-size: 0.9rem;">
+                        <li>Encrypts message</li>
+                        <li>Clicks <strong>"Export Encrypted Data"</strong></li>
+                        <li>Downloads the <strong>.json file</strong></li>
+                        <li>Sends the file to recipient</li>
+                    </ol>
+                </div>
+                <div style="background: white; padding: 12px; border-radius: 8px; border-left: 4px solid #dc3545;">
+                    <h5 style="margin: 0 0 8px 0; color: #dc3545;">👨 Recipient</h5>
+                    <ol style="margin: 0; padding-left: 20px; font-size: 0.9rem;">
+                        <li>Receives the .json file</li>
+                        <li>Clicks <strong>"Import Encrypted Data"</strong></li>
+                        <li>Selects the file</li>
+                        <li>Pastes their <strong>private key</strong></li>
+                        <li>Clicks <strong>"Decrypt"</strong></li>
+                        <li>✅ Reads the message!</li>
+                    </ol>
+                </div>
+            </div>
+            <p style="margin-top: 12px; font-size: 0.9rem; color: #2a4a6a;">
+                🔒 <strong>Security:</strong> The recipient must provide their private key to decrypt — proving they are the intended recipient.
+            </p>
+            <p style="margin-top: 8px; font-size: 0.9rem; color: #2a4a6a;">
+                ⚡ <strong>Hybrid mode:</strong> AES-256 + RSA-2048  (No size limit, fast, and secure).
+            </p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.0/ethers.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ipfs-http-client@60.0.1/dist/index.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.3.2/jsencrypt.min.js"></script>
+    <script src="js/ipfs.js"></script>
+    <script src="js/blockchain.js"></script>
+    <script src="js/asymmetric.js"></script>
+</body>
+</html>
