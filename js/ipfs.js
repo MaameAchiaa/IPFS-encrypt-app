@@ -17,10 +17,10 @@ async function initIPFS() {
 
     // Try to connect to local IPFS node
     try {
-        console.log('🌐 Trying to connect to local IPFS node at http://localhost:5001...');
+        console.log('🌐 Trying to connect to local IPFS node at http://localhost:5002...');
         
         // First check if IPFS is running using a simple fetch
-        const checkResponse = await fetch('http://localhost:5001/api/v0/version', {
+        const checkResponse = await fetch('http://localhost:5002/api/v0/version', {
             method: 'POST',
             signal: AbortSignal.timeout(3000)
         });
@@ -33,14 +33,14 @@ async function initIPFS() {
             try {
                 // Try the newer API
                 ipfs = window.IpfsHttpClient.create({
-                    url: 'http://localhost:5001/api/v0'
+                   url: 'http://localhost:5002/api/v0'
                 });
             } catch (clientError) {
                 console.warn('⚠️ Client creation with new API failed, trying alternative...');
                 // Fallback for older versions
                 ipfs = new window.IpfsHttpClient({
                     host: 'localhost',
-                    port: '5001',
+                    port: '5002',
                     protocol: 'http'
                 });
             }

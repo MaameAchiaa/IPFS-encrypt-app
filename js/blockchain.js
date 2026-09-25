@@ -4,7 +4,7 @@
 
 const CONTRACT_ADDRESS = '0x63182bbeaB223A5275458E1Daa69A6e6562D3042';
 
-// The ABI from your verified contract
+// The ABI from the verified contract
 const CONTRACT_ABI = [
     {
         "anonymous": false,
